@@ -35,7 +35,18 @@ namespace bookapi
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "bookapi", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {   Title = "bookapi",
+                    Version = "v1",
+                    Description = "A simple example ASP.NET Core Web API",
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = @"GitHub Repository",
+                        Email = string.Empty,
+                        Url = new Uri("https://github.com/DEVmajdaF/bookapideploy")
+                    }
+                });
             });
 
         }
