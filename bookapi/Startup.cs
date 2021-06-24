@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using bookapi.Repository;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace bookapi
 {
@@ -49,6 +50,15 @@ namespace bookapi
                 });
             });
 
+            services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                           ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,7 +71,23 @@ namespace bookapi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "bookapi v1"));
             }
 
-            app.UseHttpsRedirection();
+            app.UseHsts();
+            app.UseForwardedHeaders();
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DYNO")))
+            {
+                app.UseHttpsRedirection();
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
+                c.DocumentTitle = "API";
+                c.DefaultModelsExpandDepth(0);
+                c.RoutePrefix = string.Empty;
+            });
+
 
             app.UseRouting();
 
